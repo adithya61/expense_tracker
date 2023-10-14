@@ -5,13 +5,7 @@ import Input from "./Input";
 import Select from "./Select";
 import Table from "./Table";
 import { formValues } from "../utils/type";
-
-interface Items {
-  id: number;
-  description: string;
-  amount: number | string;
-  category: string;
-}
+import { Items } from "../utils/type";
 
 const ExpenseTracker = () => {
   const categories = [
@@ -38,7 +32,7 @@ const ExpenseTracker = () => {
   const [selected, setSelected] = useImmer<Items>({
     id: 1000,
     description: "",
-    amount: 0,
+    amount: "",
     category: "All Categories",
   });
 
@@ -55,6 +49,13 @@ const ExpenseTracker = () => {
     setExpenses((draft) => {
       draft.push(obj);
     });
+
+    setSelected({
+      id: 0,
+      description: "",
+      amount: "",
+      category: "All Categories",
+    });
   };
 
   const removeExpense = (id: number) => {
@@ -70,6 +71,7 @@ const ExpenseTracker = () => {
           setSelected={setSelected}
           field="description"
           type={"text"}
+          selected={selected}
         />
         <Input
           register={register}
@@ -77,14 +79,16 @@ const ExpenseTracker = () => {
           setSelected={setSelected}
           field="amount"
           type={"number"}
+          selected={selected}
         />
         {/* Drop Down */}
         <Select
+          selected={selected}
           setSelected={setSelected}
           category="category"
           categories={categories}
         />
-        <button type="submit" disabled={isValid} className="btn btn-primary">
+        <button type="submit" disabled={!isValid} className="btn btn-primary">
           Submit
         </button>
         <p>
@@ -93,6 +97,7 @@ const ExpenseTracker = () => {
       </form>
       <main>
         <Select
+          selected={selected}
           setSelected={setFilterCategory}
           category="category"
           categories={categories}

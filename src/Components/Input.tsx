@@ -1,6 +1,7 @@
-import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
+import { FieldErrors, UseFormRegister } from "react-hook-form";
 import { Updater } from "use-immer";
 import { formValues } from "../utils/type";
+import { Items } from "../utils/type";
 
 interface Props {
   setSelected: Updater<{
@@ -13,9 +14,17 @@ interface Props {
   type: string;
   register: UseFormRegister<formValues>;
   errors: FieldErrors<formValues>;
+  selected: Items;
 }
 
-function Input({ setSelected, field, type, register, errors }: Props) {
+function Input({
+  setSelected,
+  field,
+  type,
+  register,
+  errors,
+  selected,
+}: Props) {
   const validationObj = {
     required: true,
     ...(field == "description" && { minLength: 3 }),
@@ -37,11 +46,12 @@ function Input({ setSelected, field, type, register, errors }: Props) {
         id={field}
         type={type}
         className="form-control"
+        value={selected[field]}
       />
-      {errors[field]?.type == "required" && (
+      {errors[field]?.type === "required" && (
         <span className="text text-danger">This field is required</span>
       )}
-      {errors[field]?.type == "minLength" && (
+      {errors[field]?.type === "minLength" && (
         <span className="text text-danger">Enter at least 3 characters</span>
       )}
     </div>
