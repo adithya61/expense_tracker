@@ -1,8 +1,10 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent } from "react";
 import { useImmer } from "use-immer";
+import { FieldValues, useForm } from "react-hook-form";
 import Input from "./Input";
 import Select from "./Select";
 import Table from "./Table";
+import { formValues } from "../utils/type";
 
 interface Items {
   id: number;
@@ -19,11 +21,16 @@ const ExpenseTracker = () => {
     "Entertainment",
   ];
 
+  const {
+    register,
+    formState: { errors, isValid },
+  } = useForm<formValues>({ mode: "all" });
+
   const [expenses, setExpenses] = useImmer<Items[]>([
     {
       id: 0,
       description: "Milk",
-      amount: 10,
+      amount: "10",
       category: "Groceries",
     },
   ]);
@@ -51,29 +58,33 @@ const ExpenseTracker = () => {
   };
 
   const removeExpense = (id: number) => {
-    console.log("called");
     setExpenses((draft) => draft.filter((item) => item.id !== id));
   };
 
   return (
     <div>
       <form onSubmit={submitExpense}>
-        <Input setSelected={setSelected} field="description" type={"text"} />
-        <Input setSelected={setSelected} field="amount" type={"number"} />
+        <Input
+          register={register}
+          errors={errors}
+          setSelected={setSelected}
+          field="description"
+          type={"text"}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          setSelected={setSelected}
+          field="amount"
+          type={"number"}
+        />
         {/* Drop Down */}
         <Select
           setSelected={setSelected}
           category="category"
           categories={categories}
         />
-        <button
-          onChange={(e) => {
-            setSelected((draft) => {
-              console.log(draft);
-            });
-          }}
-          className="btn btn-primary"
-        >
+        <button type="submit" disabled={isValid} className="btn btn-primary">
           Submit
         </button>
         <p>
@@ -86,7 +97,11 @@ const ExpenseTracker = () => {
           category="category"
           categories={categories}
         />
-        <Table expenses={[...expenses]} removeExpense={removeExpense} />
+        <Table
+          expenses={expenses}
+          removeExpense={removeExpense}
+          selectedCategory={filterCategory.category}
+        />
       </main>
     </div>
   );

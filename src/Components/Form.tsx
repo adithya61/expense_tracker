@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const schema = z.object({
   name: z.string().min(3, { message: "name must be at least 3 characters" }),
   age: z
-    .number({ invalid_type_error: "age must be atleast 18" })
+    .number({ invalid_type_error: "age must be at least 18" })
     .min(18)
     .max(99),
 });
