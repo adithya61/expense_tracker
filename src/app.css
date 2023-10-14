@@ -1,0 +1,7 @@
+.close {
+  background: transparent;
+  outline: none;
+  border: none;
+  color: rgb(220, 139, 33);
+  float: right;
+}
