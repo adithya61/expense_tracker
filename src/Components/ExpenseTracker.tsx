@@ -1,24 +1,35 @@
-import React, { FormEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
 import { useImmer } from "use-immer";
 import { FieldValues, useForm } from "react-hook-form";
 import Input from "./Input";
 import Select from "./Select";
 import Table from "./Table";
-import { formValues } from "../utils/type";
-import { Items } from "../utils/type";
+import { Items, categories } from "../utils/type";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+export const schema = z.object({
+  description: z
+    .string()
+    .min(3, { message: "name must be at least 3 characters" }),
+  amount: z.number().min(1).max(100_000),
+  category: z.enum(["Groceries", "Utilities", "Entertainment"]),
+});
+
+type Data = z.infer<typeof schema>;
 
 const ExpenseTracker = () => {
-  const categories = [
-    "All Categories",
-    "Groceries",
-    "Utilities",
-    "Entertainment",
-  ];
-
   const {
     register,
-    formState: { errors, isValid },
-  } = useForm<formValues>({ mode: "all" });
+    handleSubmit,
+    reset,
+    formState: { errors, isValid, isSubmitSuccessful },
+    formState,
+  } = useForm<Data>({ mode: "all", resolver: zodResolver(schema) });
+
+  useEffect(() => {
+    if (isSubmitSuccessful) reset();
+  }, [reset, isSubmitSuccessful]);
 
   const [expenses, setExpenses] = useImmer<Items[]>([
     {
@@ -29,32 +40,21 @@ const ExpenseTracker = () => {
     },
   ]);
 
-  const [selected, setSelected] = useImmer<Items>({
-    id: 1000,
-    description: "",
-    amount: "",
-    category: "All Categories",
-  });
+  //   const [selected, setSelected] = useImmer(initialValues);
 
   const [filterCategory, setFilterCategory] = useImmer({
     category: "All Categories",
   });
 
-  const submitExpense = (event: FormEvent) => {
+  const handleSelectForm = (event: ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
-    const obj = {
-      ...selected,
-      id: expenses.length,
-    };
-    setExpenses((draft) => {
-      draft.push(obj);
-    });
+  };
 
-    setSelected({
-      id: 0,
-      description: "",
-      amount: "",
-      category: "All Categories",
+  const handleSelectFilter = (event: ChangeEvent<HTMLSelectElement>) => {
+    event.preventDefault();
+
+    setFilterCategory((draft) => {
+      draft.category = event.target.value;
     });
   };
 
@@ -62,44 +62,51 @@ const ExpenseTracker = () => {
     setExpenses((draft) => draft.filter((item) => item.id !== id));
   };
 
+  const submitExpense = ({ description, amount, category }: FieldValues) => {
+    const obj = {
+      id: expenses.length,
+      description,
+      amount,
+      category,
+    } as Items;
+    setExpenses((draft) => {
+      draft.push(obj);
+    });
+  };
+
   return (
     <div>
-      <form onSubmit={submitExpense}>
+      <form onSubmit={handleSubmit(submitExpense)}>
         <Input
           register={register}
           errors={errors}
-          setSelected={setSelected}
           field="description"
           type={"text"}
-          selected={selected}
         />
         <Input
           register={register}
           errors={errors}
-          setSelected={setSelected}
           field="amount"
           type={"number"}
-          selected={selected}
         />
-        {/* Drop Down */}
+        {/* Drop Down Form */}
         <Select
-          selected={selected}
-          setSelected={setSelected}
-          category="category"
+          errors={errors}
+          defaultSelect={""}
+          register={register}
+          handleSelect={handleSelectForm}
           categories={categories}
         />
-        <button type="submit" disabled={!isValid} className="btn btn-primary">
+        <button disabled={!isValid} type="submit" className="btn btn-primary mb-3">
           Submit
         </button>
-        <p>
-          {selected.category} {selected.description} {selected.amount}
-        </p>
+        <p></p>
       </form>
       <main>
+        {/* DropDown filter */}
         <Select
-          selected={selected}
-          setSelected={setFilterCategory}
-          category="category"
+          defaultSelect={"All Categories"}
+          handleSelect={handleSelectFilter}
           categories={categories}
         />
         <Table

@@ -1,7 +1,9 @@
-export declare interface formValues {
-  description: string;
-  amount: number | string;
-}
+
+export const categories: string[] = [
+    "Groceries",
+    "Utilities",
+    "Entertainment",
+  ];
 
 export declare interface Items {
   id: number;

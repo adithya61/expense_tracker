@@ -8,12 +8,13 @@ const schema = z.object({
     .number({ invalid_type_error: "age must be at least 18" })
     .min(18)
     .max(99),
+  test: z.enum(["one", "two"]),
 });
 
 type FormData = z.infer<typeof schema>;
 
 const Form = () => {
-  //   initialize with mull or causes problems.
+  // initialize with  null or cause problems.
   const {
     register,
     handleSubmit,
@@ -30,14 +31,7 @@ const Form = () => {
         <label htmlFor="name" className="form-label">
           Name
         </label>
-        <input
-          autoFocus
-          className="form-control"
-          id="name"
-          placeholder="Enter name"
-          {...register("name")}
-          type="text"
-        />
+        <input title="name" id="name" {...register("name")} type="text" />
         {errors.name && (
           <p className="text-danger mt-2">{errors.name.message}</p>
         )}
@@ -49,12 +43,16 @@ const Form = () => {
         <input
           className="form-control"
           id="age"
-          placeholder="Enter age"
           {...register("age", { valueAsNumber: true })}
           type="number"
         />
         {errors.age && <p className="text-danger mt-2">{errors.age.message}</p>}
       </div>
+      <select id="test" {...register("test", { required: true })}>
+        <option value=""></option>
+        <option value="one">one</option>
+        <option value="two">two</option>
+      </select>
       <button disabled={!isValid} className="btn btn-primary" type="submit">
         Submit
       </button>

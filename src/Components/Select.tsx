@@ -1,32 +1,35 @@
-import { Updater } from "use-immer";
-import { Items } from "../utils/type";
+import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { ChangeEvent } from "react";
 
 interface Props {
-  selected: Items;
-  setSelected: Updater<any>;
-
-  category: "category";
+  errors?: FieldErrors<any>;
+  handleSelect: (e: ChangeEvent<HTMLSelectElement>) => void;
+  register?: UseFormRegister<any>;
   categories: string[];
+  defaultSelect: string;
 }
 
-function Select({ selected, setSelected, category, categories }: Props) {
+function Select({ defaultSelect, errors, register, categories }: Props) {
+  const validObj = {
+    ...register?.("category"),
+  };
+
   return (
-    <select
-      value={selected.category}
-      title="category"
-      className="form-select mb-5 w-25"
-      onChange={(e) => {
-        setSelected((draft: { [x: string]: string }) => {
-          draft[category] = e.target.value;
-        });
-      }}
-    >
-      {categories.map((category) => (
-        <option value={category} key={category}>
-          {category}
-        </option>
-      ))}
-    </select>
+    <div>
+      <select id="category" {...validObj} className="form-select mb-3 w-50">
+        <option value={defaultSelect}>{defaultSelect}</option>
+        {categories.map((category) => (
+          <option value={category} key={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+      <p className="text text-danger">
+        {errors?.category && (
+          <span>{errors?.category?.message?.toString()}</span>
+        )}
+      </p>
+    </div>
   );
 }
 
